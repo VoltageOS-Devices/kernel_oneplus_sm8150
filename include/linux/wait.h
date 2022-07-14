@@ -209,14 +209,16 @@ void __wake_up_pollfree(struct wait_queue_head *wq_head);
 /*
  * Wakeup macros to be used to report events to the targets.
  */
+#define poll_to_key(m) ((void *)(__force uintptr_t)(__poll_t)(m))
+#define key_to_poll(m) ((__force __poll_t)(uintptr_t)(void *)(m))
 #define wake_up_poll(x, m)							\
-	__wake_up(x, TASK_NORMAL, 1, (void *) (m))
+	__wake_up(x, TASK_NORMAL, 1, poll_to_key(m))
 #define wake_up_locked_poll(x, m)						\
-	__wake_up_locked_key((x), TASK_NORMAL, (void *) (m))
+	__wake_up_locked_key((x), TASK_NORMAL, poll_to_key(m))
 #define wake_up_interruptible_poll(x, m)					\
-	__wake_up(x, TASK_INTERRUPTIBLE, 1, (void *) (m))
+	__wake_up(x, TASK_INTERRUPTIBLE, 1, poll_to_key(m))
 #define wake_up_interruptible_sync_poll(x, m)					\
-	__wake_up_sync_key((x), TASK_INTERRUPTIBLE, 1, (void *) (m))
+	__wake_up_sync_key((x), TASK_INTERRUPTIBLE, 1, poll_to_key(m))
 
 /**
  * wake_up_pollfree - signal that a polled waitqueue is going away
@@ -334,7 +336,7 @@ do {										\
 
 #define __wait_event_freezable(wq_head, condition)				\
 	___wait_event(wq_head, condition, TASK_INTERRUPTIBLE, 0, 0,		\
-			    schedule(); try_to_freeze())
+			    freezable_schedule())
 
 /**
  * wait_event_freezable - sleep (or freeze) until a condition gets true
@@ -393,7 +395,7 @@ do {										\
 #define __wait_event_freezable_timeout(wq_head, condition, timeout)		\
 	___wait_event(wq_head, ___wait_cond_timeout(condition),			\
 		      TASK_INTERRUPTIBLE, 0, timeout,				\
-		      __ret = schedule_timeout(__ret); try_to_freeze())
+		      __ret = freezable_schedule_timeout(__ret))
 
 /*
  * like wait_event_timeout() -- except it uses TASK_INTERRUPTIBLE to avoid
@@ -614,7 +616,7 @@ do {										\
 
 #define __wait_event_freezable_exclusive(wq, condition)				\
 	___wait_event(wq, condition, TASK_INTERRUPTIBLE, 1, 0,			\
-			schedule(); try_to_freeze())
+			freezable_schedule())
 
 #define wait_event_freezable_exclusive(wq, condition)				\
 ({										\
