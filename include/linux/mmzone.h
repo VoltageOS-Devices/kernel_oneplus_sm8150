@@ -36,7 +36,7 @@
  */
 #define PAGE_ALLOC_COSTLY_ORDER 3
 
-#define MAX_KSWAPD_THREADS 4
+#define MAX_KSWAPD_THREADS 8
 
 enum migratetype {
 	MIGRATE_UNMOVABLE,
@@ -905,9 +905,6 @@ typedef struct pglist_data {
 	enum zone_type kswapd_classzone_idx;
 
 	int kswapd_failures;		/* Number of 'reclaimed == 0' runs */
-
-	wait_queue_head_t kshrinkd_wait;
-	struct task_struct *kshrinkd;
 
 #ifdef CONFIG_COMPACTION
 	int kcompactd_max_order;
